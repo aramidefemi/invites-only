@@ -50,7 +50,7 @@ exports.acceptInvite = async (req, res) => {
 
     cloudinary.uploader.upload(path, function (error, result) {
       console.log(result, error); 
-      return res.redirect('http://localhost:3000/approved/' + invitee._id);
+      return res.redirect(`http://localhost:3000/approved/${invitee._id}/${invitee.fullname}/${invitee.phone}`);
     });
   } catch (error) {
     console.error(error);

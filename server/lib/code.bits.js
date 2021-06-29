@@ -139,17 +139,8 @@ exports.sendEmail = function  (Invitee,url) {
     <!--[if IE]></div><![endif]-->
   </body>`,
   }
-  const text =  'hiiiiii'
-  const msgs = {
-    to:'olasubomifemi98@gmail.com',
-    from: 'ooluwafemi@saanapay.ng', // Change to your verified sender
-    subject: 'Oluwafemi from engineering',
-    text,
-    html: `<strong>${text}</strong>`,
-  }
-  console.log(msgs)
   sgMail
-    .send(msgs)
+    .send(msg)
     .then((res) => {
       console.log('Email sent',res)
     })
