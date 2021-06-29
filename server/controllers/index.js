@@ -38,7 +38,7 @@ exports.acceptInvite = async (req, res) => {
     invitee.approved = true;
     await invitee.save();
 
-    const url = 'http://localhost:5000/authenticate/invite/' + invitee._id;
+    const url = 'https://aariz.herokuapp.com/authenticate/invite/' + invitee._id;
 
     const path = 'public/uploads/' + Math.random() + 'filename.png';
     await QRCode.toFile(path, url, {
