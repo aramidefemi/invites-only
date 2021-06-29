@@ -11,7 +11,7 @@ const path = require("path");
 const isDev = process.env.NODE_ENV !== "production";
 const port = process.env.PORT || 5000;
 const cors = require('cors'); 
-
+require('dotenv').config()
 // Configuration
 // ================================================================================================
 

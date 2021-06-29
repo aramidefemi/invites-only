@@ -48,8 +48,12 @@ exports.acceptInvite = async (req, res) => {
       },
     });
 
-    cloudinary.uploader.upload(path, function (error, result) {
+    cloudinary.uploader.upload(path, async (error, result) => {
       console.log(result, error); 
+
+      invitee.url = result.url;
+      await invitee.save();
+
       return res.redirect(`http://localhost:3000/approved/${invitee._id}/${invitee.fullname}/${invitee.phone}`);
     });
   } catch (error) {
@@ -74,7 +78,7 @@ exports.authenticateInvite = async (req, res) => {
   try {
     const invitee =  await Invitees.findOne({ _id:id, approved: true });
     
-    if(invitee) return res.send('Invitee not found');
+    if(!invitee) return res.send('Invitee not found');
     if(invitee.authenticated) return res.send(`${invitee.fullname} has already been authenticated, to attend this event. Phone number ${invitee.phone}`);
 
     invitee.authenticated = true;
