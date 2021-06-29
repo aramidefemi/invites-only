@@ -22,7 +22,7 @@ exports.createInvite = async (req, res) => {
   try {
     const invitee = new Invitees(body);
     await invitee.save();
-    const url = 'http://localhost:5000/accept/invite/' + invitee._id; 
+    const url = 'https://aariz.herokuapp.com/accept/invite/' + invitee._id; 
     sendEmail(invitee, url);
     console.log(invitee, url)
     return requestSuccessful(res, { success: true },url);
@@ -54,7 +54,7 @@ exports.acceptInvite = async (req, res) => {
       invitee.url = result.url;
       await invitee.save();
 
-      return res.redirect(`http://localhost:3000/approved/${invitee._id}/${invitee.fullname}/${invitee.phone}`);
+      return res.redirect(`https://aariz-birthday.herokuapp.com/approved/${invitee._id}/${invitee.fullname}/${invitee.phone}`);
     });
   } catch (error) {
     console.error(error);
