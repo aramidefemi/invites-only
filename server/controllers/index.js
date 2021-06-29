@@ -25,7 +25,7 @@ exports.createInvite = async (req, res) => {
     const url = 'http://localhost:5000/accept/invite/' + invitee._id; 
     sendEmail(invitee, url);
     console.log(invitee, url)
-    return requestSuccessful(res, { success: true });
+    return requestSuccessful(res, { success: true },url);
   } catch (error) {
     console.error(error);
     return requestFailed(res, 'request failure sign up: ' + error, 500);

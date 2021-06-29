@@ -5,7 +5,7 @@ let telegram_url =
   'https://api.telegram.org/bot1227967672:AAGT6hYHmrvMP5C6Xi9FJmsCeeNYmoQZrf8/sendMessage';
 
 
-sgMail.setApiKey('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');
+sgMail.setApiKey(process.env.SENDGRID);
 
 exports.sendEmail = function  (Invitee,url) {
   const msg = {
