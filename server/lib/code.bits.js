@@ -1,19 +1,29 @@
 const request = require('request');
 const axios = require('axios');
-const sgMail = require('@sendgrid/mail')
+const sgMail = require('@sendgrid/mail');
 let telegram_url =
   'https://api.telegram.org/bot1227967672:AAGT6hYHmrvMP5C6Xi9FJmsCeeNYmoQZrf8/sendMessage';
+ 
+const AWS = require("aws-sdk");
+
+AWS.config.update({
+  region: 'us-east-2',
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+});
+const ses = new AWS.SES({ apiVersion: "2010-12-01" });
+ 
+
+exports.sendEmail = async (Invitee, url) => {
+  try {
 
 
-sgMail.setApiKey(process.env.SENDGRID);
-
-exports.sendEmail = function  (Invitee,url) {
-  const msg = {
-    to: 'olasubomifemi98@gmail.com',
-    from: 'ooluwafemi@saanapay.ng', // Change to your verified sender
-    subject: 'New Invitation Received', 
-    text: `click here ${url} to accept ${Invitee.fullname}, ${Invitee.phone}`,
-    html: `<body class="clean-body" style="margin: 0;padding: 0;-webkit-text-size-adjust: 100%;background-color: #ffffff;color: #000000;line-height: inherit;">
+    const msg = {
+      to: 'olasubomifemi98@gmail.com',
+      from: 'olasubomifemi98@gmail.com', // Change to your verified sender
+      subject: 'New Invitation Received',
+      text: `click here ${url} to accept ${Invitee.fullname}, ${Invitee.phone}`,
+      html: `<body class="clean-body" style="margin: 0;padding: 0;-webkit-text-size-adjust: 100%;background-color: #ffffff;color: #000000;line-height: inherit;">
     <!--[if IE]><div class="ie-container"><![endif]-->
     <!--[if mso]><div class="mso-container"><![endif]-->
     <table style="border-collapse: collapse;table-layout: fixed;border-spacing: 0;mso-table-lspace: 0pt;mso-table-rspace: 0pt;vertical-align: top;min-width: 320px;margin: 0 auto;background-color: #ffffff;width: 100%;line-height: inherit;color: #000000;" cellpadding="0" cellspacing="0">
@@ -138,25 +148,48 @@ exports.sendEmail = function  (Invitee,url) {
     <!--[if mso]></div><![endif]-->
     <!--[if IE]></div><![endif]-->
   </body>`,
+    };
+
+    const params = {
+      Destination: {
+        ToAddresses: ["aramideajax@gmail.com","Aarizbirthday@gmail.com"] // Email address/addresses that you want to send your email
+      },
+      Message: {
+        Body: {
+          Html: {
+            // HTML Format of the email
+            Charset: "UTF-8",
+            Data:
+              msg.html
+          },
+          Text: {
+            Charset: "UTF-8",
+            Data: msg.text
+          }
+        },
+        Subject: {
+          Charset: "UTF-8",
+          Data: msg.subject
+        }
+      },
+      Source: "olasubomifemi98@gmail.com"
+    };
+    
+    const sendEmail = ses.sendEmail(params).promise();
+    
+    sendEmail
+      .then(data => {
+        console.log("email submitted to SES", data);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+
+   
+  } catch (error) {
+    console.log(error);
   }
- 
-  const msgs = {
-    to:'olasubomifemi98@gmail.com',
-    from: 'ooluwafemi@saanapay.ng', // Change to your verified sender
-    subject: 'Oluwafemi from engineering',
-    url,
-    html: `<strong>${url}</strong>`,
-  }
-  console.log(msgs)
-  sgMail
-    .send(msgs)
-    .then((res) => {
-      console.log('Email sent',res)
-    })
-    .catch((error) => {
-      console.error(error)
-    })
-}
+};
 
 exports.requestFailed = async (res, err, code) => {
   sendMessageToAdmin(`an error occurred ${err}`);
@@ -165,7 +198,7 @@ exports.requestFailed = async (res, err, code) => {
 exports.requestSuccessful = async (res, payload, message) => {
   sendMessageToAdmin(message);
   return res.status(200).send(payload);
-}; 
+};
 const sendMessageToAdmin = function (reply) {
   axios
     .post(telegram_url, {
