@@ -3,20 +3,23 @@ const axios = require('axios');
 const sgMail = require('@sendgrid/mail');
 let telegram_url =
   'https://api.telegram.org/bot1227967672:AAGT6hYHmrvMP5C6Xi9FJmsCeeNYmoQZrf8/sendMessage';
- 
-const AWS = require("aws-sdk");
+
+const AWS = require('aws-sdk');
 
 AWS.config.update({
   region: 'us-east-2',
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
 });
-const ses = new AWS.SES({ apiVersion: "2010-12-01" });
- 
+const ses = new AWS.SES({ apiVersion: '2010-12-01' });
 
-exports.sendEmail = async (Invitee, url) => {
+exports.sendEmail = async (Invitee, url, urlHasPlusOne) => {
   try {
-
+    const hasPlusOne = Invitee.hasPlusOne
+      ? `      <a href="${urlHasPlusOne}" target="_blank" style="box-sizing: border-box;display: inline-block;font-family: arial,helvetica,sans-serif;text-decoration: none;-webkit-text-size-adjust: none;text-align: center;color: #FFFFFF;background-color: #094c54;border-radius: 4px;-webkit-border-radius: 4px;-moz-border-radius: 4px;width: auto;max-width: 100%;overflow-wrap: break-word;word-break: break-word;word-wrap: break-word;mso-border-alt: none;line-height: inherit;">
+    <span style="display:block;padding:13px 30px;line-height:120%;"><span style="font-size: 16px; line-height: 19.2px;">Accept for two people</span></span>
+  </a>`
+      : 'This invite admits only one person';
 
     const msg = {
       to: 'olasubomifemi98@gmail.com',
@@ -119,8 +122,9 @@ exports.sendEmail = async (Invitee, url) => {
   <div align="left" style="line-height: inherit;">
     <!--[if mso]><table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-spacing: 0; border-collapse: collapse; mso-table-lspace:0pt; mso-table-rspace:0pt;font-family:arial,helvetica,sans-serif;"><tr><td style="font-family:arial,helvetica,sans-serif;" align="left"><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="" style="height:45px; v-text-anchor:middle; width:109px;" arcsize="9%" stroke="f" fillcolor="#094c54"><w:anchorlock/><center style="color:#FFFFFF;font-family:arial,helvetica,sans-serif;"><![endif]-->
       <a href="${url}" target="_blank" style="box-sizing: border-box;display: inline-block;font-family: arial,helvetica,sans-serif;text-decoration: none;-webkit-text-size-adjust: none;text-align: center;color: #FFFFFF;background-color: #094c54;border-radius: 4px;-webkit-border-radius: 4px;-moz-border-radius: 4px;width: auto;max-width: 100%;overflow-wrap: break-word;word-break: break-word;word-wrap: break-word;mso-border-alt: none;line-height: inherit;">
-        <span style="display:block;padding:13px 30px;line-height:120%;"><span style="font-size: 16px; line-height: 19.2px;">Accept</span></span>
+        <span style="display:block;padding:13px 30px;line-height:120%;"><span style="font-size: 16px; line-height: 19.2px;">Accept ${Invitee.hasPlusOne ? 'For one Person' : ''}}</span></span>
       </a>
+      ${hasPlusOne}
     <!--[if mso]></center></v:roundrect></td></tr></table><![endif]-->
   </div>
   
@@ -152,40 +156,37 @@ exports.sendEmail = async (Invitee, url) => {
 
     const params = {
       Destination: {
-        ToAddresses: ["aramideajax@gmail.com","Aarizbirthday@gmail.com"] // Email address/addresses that you want to send your email
+        ToAddresses: ['aramideajax@gmail.com', 'Aarizbirthday@gmail.com'], // Email address/addresses that you want to send your email
       },
       Message: {
         Body: {
           Html: {
             // HTML Format of the email
-            Charset: "UTF-8",
-            Data:
-              msg.html
+            Charset: 'UTF-8',
+            Data: msg.html,
           },
           Text: {
-            Charset: "UTF-8",
-            Data: msg.text
-          }
+            Charset: 'UTF-8',
+            Data: msg.text,
+          },
         },
         Subject: {
-          Charset: "UTF-8",
-          Data: msg.subject
-        }
+          Charset: 'UTF-8',
+          Data: msg.subject,
+        },
       },
-      Source: "olasubomifemi98@gmail.com"
+      Source: 'olasubomifemi98@gmail.com',
     };
-    
+
     const sendEmail = ses.sendEmail(params).promise();
-    
+
     sendEmail
-      .then(data => {
-        console.log("email submitted to SES", data);
+      .then((data) => {
+        console.log('email submitted to SES', data);
       })
-      .catch(error => {
+      .catch((error) => {
         console.log(error);
       });
-
-   
   } catch (error) {
     console.log(error);
   }

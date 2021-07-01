@@ -22,8 +22,9 @@ exports.createInvite = async (req, res) => {
   try {
     const invitee = new Invitees(body);
     await invitee.save();
-    const url = 'https://aariz.herokuapp.com/accept/invite/' + invitee._id; 
-    sendEmail(invitee, url);
+    const url =  `https://aariz.herokuapp.com/accept/invite/${invitee._id}?people=one`; 
+    const urlHasPlusOne = `https://aariz.herokuapp.com/accept/invite/${invitee._id}?people=two`;
+    sendEmail(invitee, url, urlHasPlusOne);
     console.log(invitee, url)
     return requestSuccessful(res, { success: true },url);
   } catch (error) {
@@ -33,17 +34,18 @@ exports.createInvite = async (req, res) => {
 };
 exports.acceptInvite = async (req, res) => {
   const { id } = req.params;
+  const { people } = req.params;
   try {
     const invitee =  await Invitees.findById(id);
     invitee.approved = true;
+    if(people != 'two') invitee.hasPlusOne = false;
     await invitee.save();
-
-    const url = 'https://aariz.herokuapp.com/authenticate/invite/' + invitee._id;
-
+    const url = `https://aariz.herokuapp.com/authenticate/invite/${invitee._id}`;
+ 
     const path = 'public/uploads/' + Math.random() + 'filename.png';
     await QRCode.toFile(path, url, {
       color: {
-        dark: '#094c54', // Blue dots
+        dark: '#fff', // Blue dots
         light: '#0000', // Transparent background
       },
     });
@@ -66,7 +68,7 @@ exports.getInvite= async (req, res) => {
   try {
     const invitee =  await Invitees.findById(id); 
 
-    return requestSuccessful(res, invitee);
+    return requestSuccessful(res, invitee,'Get invite');
   } catch (error) {
     console.error(error);
     return requestFailed(res, 'request failure sign up: ' + error, 500);

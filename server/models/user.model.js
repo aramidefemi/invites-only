@@ -15,6 +15,10 @@ const UserSchema = new mongoose.Schema(
       type: Boolean, 
       default: false
     },
+    hasPlusOne:  {
+      type: Boolean, 
+      default: false
+    },
     authenticated: {
       type: Boolean,
       default: false
