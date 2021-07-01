@@ -34,11 +34,12 @@ exports.createInvite = async (req, res) => {
 };
 exports.acceptInvite = async (req, res) => {
   const { id } = req.params;
-  const { people } = req.params;
+  const { people } = req.query;
   try {
+    console.log('people',people,people != 'two')
     const invitee =  await Invitees.findById(id);
     invitee.approved = true;
-    if(people != 'two') invitee.hasPlusOne = false;
+    if(people == 'two') invitee.hasPlusOne = true;
     await invitee.save();
     const url = `https://aariz.herokuapp.com/authenticate/invite/${invitee._id}`;
  
