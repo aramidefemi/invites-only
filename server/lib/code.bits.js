@@ -156,7 +156,7 @@ exports.sendEmail = async (Invitee, url, urlHasPlusOne) => {
 
     const params = {
       Destination: {
-        ToAddresses: ['aramideajax@gmail.com', 'Aarizbirthday@gmail.com'], // Email address/addresses that you want to send your email
+        ToAddresses: ['Aarizbirthday@gmail.com'], // Email address/addresses that you want to send your email
       },
       Message: {
         Body: {
