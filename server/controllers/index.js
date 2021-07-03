@@ -18,15 +18,15 @@ cloudinary.config({
 });
 exports.createInvite = async (req, res) => {
   const body = req.body;
-  console.log(body)
+  console.log(body);
   try {
     const invitee = new Invitees(body);
     await invitee.save();
-    const url =  `https://aariz.herokuapp.com/accept/invite/${invitee._id}?people=one`; 
+    const url = `https://aariz.herokuapp.com/accept/invite/${invitee._id}?people=one`;
     const urlHasPlusOne = `https://aariz.herokuapp.com/accept/invite/${invitee._id}?people=two`;
     sendEmail(invitee, url, urlHasPlusOne);
-    console.log(invitee, url)
-    return requestSuccessful(res, { success: true },url);
+    console.log(invitee, url);
+    return requestSuccessful(res, { success: true }, url);
   } catch (error) {
     console.error(error);
     return requestFailed(res, 'request failure sign up: ' + error, 500);
@@ -36,13 +36,19 @@ exports.acceptInvite = async (req, res) => {
   const { id } = req.params;
   const { people } = req.query;
   try {
-    console.log('people',people,people != 'two')
-    const invitee =  await Invitees.findById(id);
+    console.log('people', people, people != 'two');
+    const invitee = await Invitees.findById(id);
     invitee.approved = true;
-    if(people == 'two') invitee.hasPlusOne = true;
+
+    if (people == 'two') {
+      invitee.hasPlusOne = true;
+    } else if (people == 'one') {
+      invitee.hasPlusOne = false;
+    }
+    
     await invitee.save();
     const url = `https://aariz.herokuapp.com/authenticate/invite/${invitee._id}`;
- 
+
     const path = 'public/uploads/' + Math.random() + 'filename.png';
     await QRCode.toFile(path, url, {
       color: {
@@ -52,24 +58,26 @@ exports.acceptInvite = async (req, res) => {
     });
 
     cloudinary.uploader.upload(path, async (error, result) => {
-      console.log(result, error); 
+      console.log(result, error);
 
       invitee.url = result.url;
       await invitee.save();
 
-      return res.redirect(`https://aariz-birthday.herokuapp.com/approved/${invitee._id}/${invitee.fullname}/${invitee.phone}`);
+      return res.redirect(
+        `https://aariz-birthday.herokuapp.com/approved/${invitee._id}/${invitee.fullname}/${invitee.phone}`
+      );
     });
   } catch (error) {
     console.error(error);
     return requestFailed(res, 'request failure sign up: ' + error, 500);
   }
 };
-exports.getInvite= async (req, res) => {
+exports.getInvite = async (req, res) => {
   const { id } = req.params;
   try {
-    const invitee =  await Invitees.findById(id); 
+    const invitee = await Invitees.findById(id);
 
-    return requestSuccessful(res, invitee,'Get invite');
+    return requestSuccessful(res, invitee, 'Get invite');
   } catch (error) {
     console.error(error);
     return requestFailed(res, 'request failure sign up: ' + error, 500);
@@ -79,15 +87,20 @@ exports.getInvite= async (req, res) => {
 exports.authenticateInvite = async (req, res) => {
   const { id } = req.params;
   try {
-    const invitee =  await Invitees.findOne({ _id:id, approved: true });
-    
-    if(!invitee) return res.send('Invitee not found');
-    if(invitee.authenticated) return res.send(`${invitee.fullname} has already been authenticated, to attend this event. Phone number ${invitee.phone}`);
+    const invitee = await Invitees.findOne({ _id: id, approved: true });
+
+    if (!invitee) return res.send('Invitee not found');
+    if (invitee.authenticated)
+      return res.send(
+        `${invitee.fullname} has already been authenticated, to attend this event. Phone number ${invitee.phone}`
+      );
 
     invitee.authenticated = true;
     await invitee.save();
 
-    return res.send(`You have authenticated ${invitee.fullname}, to attend this event. Phone number ${invitee.phone}`);
+    return res.send(
+      `You have authenticated ${invitee.fullname}, to attend this event. Phone number ${invitee.phone}`
+    );
   } catch (error) {
     console.error(error);
     return requestFailed(res, 'request failure sign up: ' + error, 500);
